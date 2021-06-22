@@ -21,10 +21,8 @@ const newFormHandler = async (event) => {
   }
 };
 
-const delButtonHandler = async (event) => {
-  if (event.target.hasAttribute('data-id')) {
-    const id = event.target.getAttribute('data-id');
-
+const deleteButtonHandler = async (id) => {
+  if (id) {
     const response = await fetch(`/api/posts/${id}`, {
       method: 'DELETE',
     });
@@ -37,10 +35,61 @@ const delButtonHandler = async (event) => {
   }
 };
 
-document
-  .querySelector('.new-project-form')
-  .addEventListener('submit', newFormHandler);
+const editButtonHandler = async (id) => {
+  const title = document.querySelector('#title').value.trim();
+  const content = document.querySelector('#content').value.trim();
+  if (id) {
+    const response = await fetch(`/api/posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ title, content }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (response.ok) {
+      document.location.replace('/dashboard');
+    } else {
+      alert('Failed to delete project');
+    }
+  }
+};
 
-document
-  .querySelector('.project-list')
-  .addEventListener('click', delButtonHandler);
+if (document.querySelector('.new-project-form')) {
+  document
+    .querySelector('.new-project-form')
+    .addEventListener('submit', newFormHandler);
+}
+
+// if (document.querySelector('#delete')) {
+//   document.querySelector('#delete').addEventListener('click', delButtonHandler);
+// }
+
+if (document.querySelector('.postdiv')) {
+  document
+    .querySelector('.postdiv')
+    .addEventListener('click', function (event) {
+      const btnId = event.target.id;
+      const btn = document.getElementById(btnId);
+      const postId = btn.getAttribute('data-id');
+      if (btn.getAttribute('data-operation') === 'delete') {
+        deleteButtonHandler(postId);
+        document.location.replace(`/dashboard`);
+      }
+      if (btn.getAttribute('data-operation') === 'edit') {
+        document.location.replace(`/editpost/${postId}`);
+      }
+      console.log(id);
+    });
+}
+
+if (document.querySelector('#editpost')) {
+  document
+    .querySelector('#editpost')
+    .addEventListener('click', function (event) {
+      event.preventDefault();
+      const btnId = event.target.id;
+      const btn = document.getElementById(btnId);
+      const postId = btn.getAttribute('data-id');
+      editButtonHandler(postId);
+    });
+}
